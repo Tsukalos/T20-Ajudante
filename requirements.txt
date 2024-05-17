@@ -3,4 +3,3 @@ langchain_chroma
 langchain_google_vertexai
 streamlit
 jq
-sqlite
