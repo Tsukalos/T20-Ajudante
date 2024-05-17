@@ -3,4 +3,4 @@ langchain_chroma
 langchain_google_vertexai
 streamlit
 jq
-sqlite >= 3.35.0
+sqlite
