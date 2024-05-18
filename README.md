@@ -5,6 +5,8 @@ AjudanTe20 é um assistente que utiliza das capacidades geracionais dos modelos 
 
 Adicionalmente, o assistente pode ajudar na criação de ganchos e personagens para uma aventura, utilizando do contexto do mundo de Arton presente em sua base de conhecimento.
 
+https://ajudante20.com/
+
 ## Funcionamento
 ![ex-gif](./img/example.gif)
 
@@ -18,12 +20,13 @@ Veja a [documentação oficial](https://cloud.google.com/docs/authentication/app
 
 #### requirements.txt
 ```
-ipython==8.12.3
-langchain==0.1.20
-langchain_chroma==0.1.1
-langchain_community==0.0.38
-langchain_core==0.1.52
-langchain_google_vertexai==1.0.3
-streamlit==1.34.0
-jq==1.7.0
+langchain
+langchain_chroma
+langchain_google_vertexai
+streamlit
+jq
 ```
+
+### Agradecimentos
+
+@pyanderson pelos [dados extraídos](https://github.com/pyanderson/roll20_tormenta20_grimoire) do livro.

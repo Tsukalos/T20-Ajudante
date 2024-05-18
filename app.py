@@ -1,16 +1,14 @@
 import streamlit as st
 
 import os
-import time
 
 from langchain.text_splitter import MarkdownTextSplitter
 from langchain_chroma import Chroma
 from langchain_google_vertexai import VertexAIEmbeddings, ChatVertexAI
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnablePassthrough, RunnableParallel
+from langchain_core.runnables import RunnablePassthrough
 from langchain_core.prompts import PromptTemplate
 
-from IPython.display import display, Markdown
 from argparse import ArgumentParser
 from grimoire_loader import create_grimoire_docs
 
@@ -62,29 +60,54 @@ def initialize_data():
 
 retriever, custom_rag_prompt = initialize_data()
 
-st.title("Ajudante do Mestre")
-
-
+st.title("AjudanTe20 - Assistente de Mestre")
 
 def format_docs(docs):
     return "\n\n".join(doc.page_content for doc in docs)
 
 def generate_response(text):
-    llm = ChatVertexAI(model=model, temperature=temperature, max_tokens=8192, location="us-central1")
-    rag_chain = (
-        {"context": retriever | format_docs, "question": RunnablePassthrough()}
-        | custom_rag_prompt
-        | llm
-        | StrOutputParser()
-    )
-    st.divider()
-    st.write_stream(rag_chain.stream(text))
+    if text != '':
+        with st.spinner('Gerando...'):
+            llm = ChatVertexAI(model=st.session_state.model, temperature=st.session_state.temperature, max_tokens=8192, location="us-central1")
+            rag_chain = (
+                {"context": retriever | format_docs, "question": RunnablePassthrough()}
+                | custom_rag_prompt
+                | llm
+                | StrOutputParser()
+            )
+            st.divider()
+            full = st.write_stream(rag_chain.stream(text))
+            with st.expander("Código markdown"):
+                st.code(full, language="markdown")
 
 with st.form('ask_llm'):
-    model = st.sidebar.selectbox("Modelo", ['gemini-1.5-pro-preview-0514', 'gemini-1.5-flash-preview-0514', 'gemini-1.0-pro'])
-    temperature = st.sidebar.slider("Temperatura", 0.0, 1.0, value=1.0, step=0.05)      
-    text = st.text_area('Pergunte aqui...')
+    st.sidebar.selectbox("Modelo", ['gemini-1.5-pro-preview-0514', 'gemini-1.5-flash-preview-0514', 'gemini-1.0-pro'], key='model')
+    st.sidebar.slider("Temperatura", 0.0, 1.0, value=1.0, step=0.05, key='temperature')      
+    text = st.text_area('Faça uma pergunta, peça uma sugestão de gancho ou personagem...', key='llm_input_text')
     submitted = st.form_submit_button('Enviar')
-    if submitted:
-        with st.spinner('Gerando...'):
-            generate_response(text)
+    if submitted and text != '':
+        generate_response(text)
+
+
+footer="""<style>
+
+a:hover,  a:active {
+color: red;
+background-color: transparent;
+text-decoration: underline;
+}
+
+.footer {
+position: fixed;
+left: 0;
+bottom: 0;
+width: 99%;
+text-align: right;
+}
+</style>
+<div class="footer">
+<p>Source code in <a style='color:inherit;' href="https://github.com/Tsukalos/T20-Ajudante" target="_blank">Github</a></p>
+</div>
+"""
+st.markdown(footer,unsafe_allow_html=True)
+
