@@ -22,6 +22,7 @@ Veja a [documentação oficial](https://cloud.google.com/docs/authentication/app
 ```
 langchain
 langchain_chroma
+langchain_community
 langchain_google_vertexai
 streamlit
 jq
