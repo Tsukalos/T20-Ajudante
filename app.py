@@ -14,6 +14,7 @@ from grimoire_loader import create_grimoire_docs
 
 parser = ArgumentParser("Ajudante do Mestre - Atlas de Arton")
 parser.add_argument("--generate_embeddings", action="store_true", help="Gera os documentos e embeddings, sobreescrevendo o vectorstore existente.")
+parser.add_argument("--reveal_retrieved_docs", action="store_true")
 args = parser.parse_args()
 
 @st.cache_resource
@@ -63,6 +64,9 @@ retriever, custom_rag_prompt = initialize_data()
 st.title("AjudanTe20 - Assistente de Mestre")
 
 def format_docs(docs):
+    if args.reveal_retrieved_docs:
+        for doc in docs:
+            print(doc.page_content+"\n")
     return "\n\n".join(doc.page_content for doc in docs)
 
 def generate_response(text):
@@ -75,7 +79,6 @@ def generate_response(text):
                 | llm
                 | StrOutputParser()
             )
-            st.divider()
             full = st.write_stream(rag_chain.stream(text))
             with st.expander("Código markdown"):
                 st.code(full, language="markdown")
@@ -106,7 +109,7 @@ text-align: right;
 }
 </style>
 <div class="footer">
-<p>Source code in <a style='color:inherit;' href="https://github.com/Tsukalos/T20-Ajudante" target="_blank">Github</a></p>
+<p>Código fonte no <a style='color:inherit;' href="https://github.com/Tsukalos/T20-Ajudante" target="_blank">Github</a></p>
 </div>
 """
 st.markdown(footer,unsafe_allow_html=True)
