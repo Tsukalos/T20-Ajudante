@@ -10,6 +10,8 @@ https://ajudante20.com/
 ## Funcionamento
 ![ex-gif](./img/example.gif)
 
+Veja uma lista de exemplos de uso na página [Exemplos](./exemplos/exemplos.md).
+
 ### Parâmetros
 Descrição dos parâmetros escolhidos pela barra lateral.
 

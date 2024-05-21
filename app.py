@@ -93,13 +93,11 @@ with st.form('ask_llm'):
 
 
 footer="""<style>
-
 a:hover,  a:active {
 color: red;
 background-color: transparent;
 text-decoration: underline;
 }
-
 .footer {
 position: fixed;
 left: 0;
