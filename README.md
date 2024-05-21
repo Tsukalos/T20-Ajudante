@@ -10,11 +10,28 @@ https://ajudante20.com/
 ## Funcionamento
 ![ex-gif](./img/example.gif)
 
+### Parâmetros
+Descrição dos parâmetros escolhidos pela barra lateral.
+
+#### Temperatura
+
+Temperatura é um parâmetro que controla o grau de aleatoriedade ou criatividade nas respostas geradas. Funciona ajustando a distribuição de probabilidade das palavras que o modelo pode escolher.
+
+- Temperatura baixa (próxima de 0): O modelo tende a selecionar as palavras mais prováveis, resultando em respostas mais previsíveis, focadas e conservadoras. Isso é útil quando a precisão e a coerência são prioritárias, como em tarefas de tradução ou resumo.
+
+- Temperatura alta (próxima de 1): O modelo tem mais liberdade para escolher palavras menos prováveis, levando a respostas mais diversas, criativas e até mesmo inesperadas. Isso é útil em tarefas que exigem imaginação, como geração de poemas ou roteiros.
+
+Em resumo, a temperatura permite ajustar o equilíbrio entre previsibilidade e criatividade nas respostas do modelo, adaptando-o a diferentes tipos de tarefas e necessidades.
+
+#### Modelo
+
+Veja a documentação oficial da [Google](https://ai.google.dev/gemini-api/docs/models/gemini) para mais informações sobre os diferentes modelos.
+
 ## Requerimentos
 Para usar a IA Generativa do Vertex AI, você deve ter o pacote Python `langchain-google-vertexai` instalado e uma das seguintes opções:
 
 - Ter as credenciais configuradas para o seu ambiente (gcloud, identidade de carga de trabalho, etc...)
-- Armazenar o caminho para um arquivo JSON da conta de serviço como a variável de ambiente GOOGLE_APPLICATION_CREDENTIALS.
+- Armazenar o caminho para um arquivo JSON da conta de serviço como a variável de ambiente `GOOGLE_APPLICATION_CREDENTIALS`.
 
 Veja a [documentação oficial](https://cloud.google.com/docs/authentication/application-default-credentials#GAC) para mais informações.
 
