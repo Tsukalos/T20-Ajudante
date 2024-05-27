@@ -17,6 +17,8 @@ parser.add_argument("--generate_embeddings", action="store_true", help="Gera os 
 parser.add_argument("--reveal_retrieved_docs", action="store_true")
 args = parser.parse_args()
 
+st.set_page_config(page_title='AjudanTe20', page_icon='img/128px-D20_icon.png')
+
 @st.cache_resource
 def initialize_data():
     DATA_DIR = "./data/"
@@ -48,7 +50,7 @@ def initialize_data():
     Em um pedido de criação, você vai ajudar na criação de ganchos, personagens e descrições, assim como responder perguntas sobre o mundo e sistema a partir do contexto disponível.
     Caso o contexto forneça um personagem, tente utiliza-lo.
     Em um pedido de criação, ambientes e personagens devem ter descrições bem desenvolvidas e longas.
-    Formate a saída em markdown.
+    Sempre formate a saída em markdown.
 
     Contexto: {context}
 
@@ -84,8 +86,9 @@ def generate_response(text):
                 st.code(full, language="markdown")
 
 with st.form('ask_llm'):
-    st.sidebar.selectbox("Modelo", ['gemini-1.5-pro-preview-0514', 'gemini-1.5-flash-preview-0514', 'gemini-1.0-pro'], key='model')
-    st.sidebar.slider("Temperatura", 0.0, 1.0, value=1.0, step=0.05, key='temperature')      
+    with st.expander("Parâmetros"):
+        st.selectbox("Modelo", ['gemini-1.5-pro-preview-0514', 'gemini-1.5-flash-preview-0514', 'gemini-1.0-pro'], key='model')
+        st.slider("Temperatura", 0.0, 1.0, value=1.0, step=0.05, key='temperature')      
     text = st.text_area('Faça uma pergunta, peça uma sugestão de gancho ou personagem...', key='llm_input_text')
     submitted = st.form_submit_button('Enviar')
     if submitted and text != '':
@@ -99,7 +102,6 @@ background-color: transparent;
 text-decoration: underline;
 }
 .footer {
-position: fixed;
 left: 0;
 bottom: 0;
 width: 99%;
@@ -107,7 +109,7 @@ text-align: right;
 }
 </style>
 <div class="footer">
-<p>Código fonte no <a style='color:inherit;' href="https://github.com/Tsukalos/T20-Ajudante" target="_blank">Github</a></p>
+<p>Código fonte no <a style='color:inherit;' href="https://github.com/Tsukalos/T20-Ajudante" target="_blank">Github</a>.</p>
 </div>
 """
 st.markdown(footer,unsafe_allow_html=True)
