@@ -11,6 +11,7 @@ from langchain_core.prompts import PromptTemplate
 
 from argparse import ArgumentParser
 from grimoire_loader import create_grimoire_docs
+from book_sections_loader import get_book_sections
 
 parser = ArgumentParser("Ajudante do Mestre - Atlas de Arton")
 parser.add_argument("--generate_embeddings", action="store_true", help="Gera os documentos e embeddings, sobreescrevendo o vectorstore existente.")
@@ -34,11 +35,17 @@ def initialize_data():
         docs = []
         # define o divisor de arquivos para o .md do atlas de arton
         splitter = MarkdownTextSplitter(chunk_size=2048, chunk_overlap=128)
+
+        # seções do livro
+        texts, metadatas = get_book_sections()
         # divide os documentos dado o divisor.
-        docs += splitter.create_documents([md_text])
+        docs += splitter.create_documents([md_text] + texts, metadatas=[{"source": "atlas/output_clean.md"}] + metadatas)
         docs += create_grimoire_docs()
-        print(docs)
+
+        print(f'Num. docs: {len(docs)}')
+
         vectorstore = Chroma.from_documents(documents=docs, embedding=embedding_function, persist_directory=chroma_dir)
+
     vectorstore = Chroma(persist_directory=chroma_dir, embedding_function=embedding_function)
 
     retriever = vectorstore.as_retriever(search_type="mmr",search_kwargs={"k": 7})
@@ -68,7 +75,7 @@ st.title("AjudanTe20 - Assistente de Mestre")
 def format_docs(docs):
     if args.reveal_retrieved_docs:
         for doc in docs:
-            print(doc.page_content+"\n")
+            print(f'{doc.page_content}\n{doc.metadata}\n\n\n')
     return "\n\n".join(doc.page_content for doc in docs)
 
 def generate_response(text):
@@ -86,9 +93,10 @@ def generate_response(text):
                 st.code(full, language="markdown")
 
 with st.form('ask_llm'):
-    with st.expander("Parâmetros"):
+    with st.expander("Parâmetros de configuração"):
         st.selectbox("Modelo", ['gemini-1.5-pro-preview-0514', 'gemini-1.5-flash-preview-0514', 'gemini-1.0-pro'], key='model')
-        st.slider("Temperatura", 0.0, 1.0, value=1.0, step=0.05, key='temperature')      
+        st.slider("Temperatura", 0.0, 1.0, value=1.0, step=0.05, key='temperature')
+        st.write("[O que é a isso?](https://github.com/Tsukalos/T20-Ajudante?#par%C3%A2metros)")      
     text = st.text_area('Faça uma pergunta, peça uma sugestão de gancho ou personagem...', key='llm_input_text')
     submitted = st.form_submit_button('Enviar')
     if submitted and text != '':

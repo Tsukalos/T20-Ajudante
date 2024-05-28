@@ -20,7 +20,7 @@ Você escolhe mais {data['extraSkillsQty']} perícias da seguinte lista:
 - {'\n- '.join(data['extraSkills'])}
 """
 
-    all_docs.append(Document(main_stats))
+    all_docs.append(Document(main_stats, metadata={"source": class_json_path}))
 
     class_name = data['name']
     schema = f'.abilities[] | "Habilidade de {class_name}: \\(.name) - \\(.description)"'
@@ -44,7 +44,7 @@ Atributos:
     for attribute in data["attributes"]:
         main_stats += f"  - {str.upper(attribute['attr'])}: {attribute['mod']}\n"
 
-    all_docs.append(Document(main_stats))
+    all_docs.append(Document(main_stats, metadata={"source": race_json_path}))
 
     race_name = data['name']
     schema = f'.abilities[] | "Habilidade de {race_name}: \\(.name) - \\(.description)"'
@@ -79,7 +79,7 @@ Melhorias:
             main_stats += f'''   - Custo: {implement["cost"]}
             Descrição: {implement["description"]}
         '''
-        all_docs.append(Document(main_stats))
+        all_docs.append(Document(main_stats, metadata={"source": spell_json_path}))
 
     return all_docs
 
@@ -89,18 +89,18 @@ def _get_book_docs(book_json_path):
     with open(book_json_path, "r") as f:
         data = json.load(f)
 
-    def iterate_and_generate_doc(folder_items):
+    def iterate_and_generate_doc(folder_items, original_path):
         all_docs = []
         for i in folder_items:
             if i["type"] == "item":
                 text = f'{i["name"]} - {i["description"]}'
-                doc = Document(text)
+                doc = Document(text, metadata={"source": original_path})
                 all_docs.append(doc)
             else:
-                all_docs += iterate_and_generate_doc(i["items"])
+                all_docs += iterate_and_generate_doc(i["items"], original_path)
         return all_docs
 
-    return iterate_and_generate_doc(data["items"])
+    return iterate_and_generate_doc(data["items"], book_json_path)
 
 
 def _get_docs_from_schema(json_path: str, schema: str):
