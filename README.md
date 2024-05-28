@@ -10,10 +10,10 @@ https://ajudante20.com/
 ## Funcionamento
 ![ex-gif](./img/example.gif)
 
-Veja uma lista de exemplos de uso na página [Exemplos](./exemplos/exemplos.md).
+Veja uma lista de exemplos de uso na página [Exemplos](./exemplos/README.md).
 
 ### Parâmetros
-Descrição dos parâmetros escolhidos pela barra lateral.
+Descrição dos parâmetros de configuração.
 
 #### Temperatura
 
@@ -46,6 +46,9 @@ langchain_google_vertexai
 streamlit
 jq
 ```
+
+### Licença
+Todo o conteúdo da pasta `data` está sob a [Open Game License](OPEN_GAME_LICENSE).
 
 ### Agradecimentos
 
