@@ -47,7 +47,14 @@ streamlit
 jq
 ```
 
-### Licença
+## To-do
+
+- [ ] Adicionar mais documentos gerais, como os de ameaças (livro base e/ou guia de ameaças).
+- [ ] Extrair e formatar todas as tabelas do livro base em texto/markdown.
+- [ ] Utilizar técnicas mais sofisticadas de recuperação (retrieval) de documentos (por exemplo, [aqui](https://github.com/gkamradt/langchain-tutorials/blob/main/data_generation/Advanced%20Retrieval%20With%20LangChain.ipynb))
+- [ ] Criar documentos próprios que detalhem melhor as regras de criação de personagens e NPCs para uma melhor capacidade generativa.
+
+## Licença
 Todo o conteúdo da pasta `data` está sob a [Open Game License](OPEN_GAME_LICENSE).
 
 ### Agradecimentos

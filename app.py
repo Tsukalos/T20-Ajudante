@@ -64,7 +64,7 @@ def initialize_data():
     Caso o contexto forneça um personagem, tente utiliza-lo.
     Em um pedido de criação, ambientes e personagens devem ter descrições bem desenvolvidas e longas.
 
-    Se utilizar um contexto, formate ele caso não esteja legível.
+    Se utilizar um contexto, internamente, caso necessário, formate ele de forma que fique mais fácil de ser interpretado.
 
     Sempre formate a saída em markdown.
 
@@ -125,7 +125,7 @@ com as informações necessárias para uma melhor capacidade generativa.
              
 Confira exemplos de uso [aqui](https://github.com/Tsukalos/T20-Ajudante/tree/main/exemplos).
 """
-)
+             )
 with st.form('ask_llm'):
     text = st.text_area(
         'Coloque sua entrada/prompt aqui...', key='llm_input_text')
