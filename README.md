@@ -10,6 +10,17 @@ https://ajudante20.com/
 ## Funcionamento
 ![ex-gif](./img/example.gif)
 
+A partir de diversos dados (documentos) gerados a partir do livro de regras
+e outras fontes formatadas, é gerada uma base de documentos (*vectorstore*) armazenados
+em forma de vetores. Esses vetores são gerados conforme um modelo de *embeddings*
+que agrupa documentos similares/sobre um mesmo assunto em proximidade em um espaço vetorial.
+Quando uma pergunta, ou prompt, é feita, essa mesma informação passa pelo modelo de *embedding*
+para gerar um vetor que é buscado contra todos os vetores na base de dados.
+             
+Com isso, os documentos pertinentes são selecionados conforme uma função de similaridade.
+Tais documentos funcionam como um contexto que é adicionado junto a entrada original, alimentando o modelo LLM
+com as informações necessárias para uma melhor capacidade generativa.
+
 Veja uma lista de exemplos de uso na página [Exemplos](./exemplos/README.md).
 
 ### Parâmetros

@@ -30,13 +30,16 @@ def initialize_data():
         "text-embedding-004", location="us-central1")
     # aonde salvar os embeddings
     chroma_dir = os.path.join(DATA_DIR, "chroma_db/")
+    store_dir = os.path.join(DATA_DIR, 'store/')
+    if not os.path.exists(store_dir):
+        os.makedirs(store_dir)
     if args.generate_embeddings:
         with open(os.path.join(DATA_DIR, 'atlas/output_clean.md'), 'r') as file:
             md_text = file.read()
 
         docs = []
         # define o divisor de arquivos para o .md do atlas de arton
-        splitter = MarkdownTextSplitter(chunk_size=2048, chunk_overlap=128)
+        splitter = MarkdownTextSplitter(chunk_size=4096, chunk_overlap=256)
 
         # seções do livro
         texts, metadatas = book_loader()
@@ -50,11 +53,14 @@ def initialize_data():
         vectorstore = Chroma.from_documents(
             documents=docs, embedding=embedding_function, persist_directory=chroma_dir)
 
+    
     vectorstore = Chroma(persist_directory=chroma_dir,
                          embedding_function=embedding_function)
-
+    
     retriever = vectorstore.as_retriever(
         search_type="mmr", search_kwargs={"k": 7})
+    
+
 
     template = """
     Você é um ajudante de um mestre de RPG, no sistema Tormenta 20, utilizando o cenário padrão de Arton. Não utilize informações de outros sistemas.
@@ -91,7 +97,7 @@ def format_docs(docs):
 def generate_response(text):
     if text != '':
         with st.spinner('Gerando...'):
-            llm = ChatVertexAI(model=st.session_state.model,
+            llm = ChatVertexAI(model=st.session_state.model_name,
                                temperature=st.session_state.temperature, max_tokens=8192, location="us-central1")
             rag_chain = (
                 {"context": retriever | format_docs,
@@ -111,17 +117,14 @@ st.write("Um assistente para mestres do sistema Tormenta20 para ajudar na criaç
 with st.expander("Como funciona?"):
     st.divider()
     st.write("""
-A partir de diversos dados (documentos) gerados a partir do livro de regras
-e outras fontes formatadas, é gerada uma base de documentos (*vectorstore*) armazenados
-em forma de vetores. Esses vetores são gerados conforme um modelo de *embeddings*
-que agrupa documentos similares/sobre um mesmo assunto em proximidade em um espaço vetorial.
-Quando uma pergunta, ou prompt, é feita, essa mesma informação passa pelo modelo de *embedding*
-para gerar um vetor que é buscado contra todos os vetores na base de dados.
-             
+Imagine um sistema que organiza informações de um livro de regras e outras fontes em "gavetas" especiais.
+Essas gavetas agrupam informações parecidas, como se fossem pastas com temas específicos.
 
-Com isso, os documentos pertinentes são selecionados conforme uma função de similaridade.
-Tais documentos funcionam como um contexto que é adicionado junto a entrada original, alimentando o modelo LLM
-com as informações necessárias para uma melhor capacidade generativa.
+Quando você faz uma pergunta, o sistema transforma sua pergunta em uma "chave" que procura nas gavetas certas.
+As gavetas mais relevantes são encontradas, e as informações dentro delas são usadas para criar uma resposta completa e precisa.
+
+É como ter um assistente que encontra rapidamente as informações mais importantes para responder às suas perguntas,
+usando um sistema inteligente de organização.
              
 Confira exemplos de uso [aqui](https://github.com/Tsukalos/T20-Ajudante/tree/main/exemplos).
 """
@@ -131,7 +134,7 @@ with st.form('ask_llm'):
         'Coloque sua entrada/prompt aqui...', key='llm_input_text')
     with st.expander("Parâmetros de configuração"):
         st.selectbox("Modelo", ['gemini-1.5-pro-preview-0514',
-                     'gemini-1.5-flash-preview-0514', 'gemini-1.0-pro'], key='model')
+                     'gemini-1.5-flash-preview-0514', 'gemini-1.0-pro'], key='model_name')
         st.slider("Temperatura", 0.0, 1.0, value=1.0,
                   step=0.05, key='temperature')
         st.write(
