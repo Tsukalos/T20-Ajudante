@@ -17,16 +17,26 @@ from langchain_core.prompts import PromptTemplate
 from argparse import ArgumentParser
 from loaders import book_loader, get_grimoire_docs
 
+
+
 parser = ArgumentParser("Ajudante do Mestre - Atlas de Arton")
 parser.add_argument("--generate_embeddings", action="store_true",
                     help="Gera os documentos e embeddings, sobreescrevendo o vectorstore existente.")
 parser.add_argument("--reveal_retrieved_docs", action="store_true")
 args = parser.parse_args()
 
-st.set_page_config(page_title='AjudanTe20', page_icon='img/128px-D20_icon.png')
+
+
+__import__('pysqlite3')
+import sys
+sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+
+
 if "GOOGLE_API_KEY" not in os.environ:
     os.environ["GOOGLE_API_KEY"] = getpass("Provide your Google API key here: ")
 
+
+st.set_page_config(page_title='AjudanTe20', page_icon='img/128px-D20_icon.png')
 @st.cache_resource
 def initialize_data():
     

@@ -4,3 +4,4 @@ langchain_community
 langchain-google-genai
 streamlit
 jq
+pysqlite3-binary
