@@ -91,12 +91,18 @@ def initialize_data():
 
     Se utilizar um contexto, internamente, caso necessário, formate ele de forma que fique mais fácil de ser interpretado.
 
+    Você deve buscar o contexto e recuperar as informações relevantes que respondam a requisição, ou pergunta, dada na entrada.
+
     Sempre formate a saída em markdown.
 
     Contexto: {context}
 
+    ---
+
     Entrada: {question}
 
+    ---
+    Saída:
     """
     custom_rag_prompt = PromptTemplate.from_template(template)
 
@@ -117,7 +123,7 @@ def generate_response(text):
     if text != '':
         with st.spinner('Gerando...'):
             llm = ChatGoogleGenerativeAI(model=st.session_state.model_name,
-                               temperature=st.session_state.temperature, max_tokens=8192, max_output_tokens=8192)
+                               temperature=st.session_state.temperature, max_tokens=8192, max_output_tokens=8192, max_retries=12, timeout=30)
             rag_chain = (
                 {"context": retriever | format_docs,
                     "question": RunnablePassthrough()}
