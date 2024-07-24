@@ -1,10 +1,15 @@
 import streamlit as st
 
+from getpass import getpass
 import os
 
 from langchain.text_splitter import MarkdownTextSplitter
 from langchain_chroma import Chroma
-from langchain_google_vertexai import VertexAIEmbeddings, ChatVertexAI
+
+
+from langchain_google_genai.embeddings import GoogleGenerativeAIEmbeddings
+from langchain_google_genai import ChatGoogleGenerativeAI
+
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.prompts import PromptTemplate
@@ -19,15 +24,18 @@ parser.add_argument("--reveal_retrieved_docs", action="store_true")
 args = parser.parse_args()
 
 st.set_page_config(page_title='AjudanTe20', page_icon='img/128px-D20_icon.png')
-
+if "GOOGLE_API_KEY" not in os.environ:
+    os.environ["GOOGLE_API_KEY"] = getpass("Provide your Google API key here: ")
 
 @st.cache_resource
 def initialize_data():
+    
+
     DATA_DIR = "./data/"
 
     # define o modelo para gerar os embeddings
-    embedding_function = VertexAIEmbeddings(
-        "text-embedding-004", location="us-central1")
+    embedding_function = GoogleGenerativeAIEmbeddings(
+        model="models/text-embedding-004")
     # aonde salvar os embeddings
     chroma_dir = os.path.join(DATA_DIR, "chroma_db/")
     store_dir = os.path.join(DATA_DIR, 'store/')
@@ -97,8 +105,8 @@ def format_docs(docs):
 def generate_response(text):
     if text != '':
         with st.spinner('Gerando...'):
-            llm = ChatVertexAI(model=st.session_state.model_name,
-                               temperature=st.session_state.temperature, max_tokens=8192, location="us-central1")
+            llm = ChatGoogleGenerativeAI(model=st.session_state.model_name,
+                               temperature=st.session_state.temperature, max_tokens=8192, max_output_tokens=8192)
             rag_chain = (
                 {"context": retriever | format_docs,
                     "question": RunnablePassthrough()}
@@ -133,8 +141,8 @@ with st.form('ask_llm'):
     text = st.text_area(
         'Coloque sua entrada/prompt aqui...', key='llm_input_text')
     with st.expander("Parâmetros de configuração"):
-        st.selectbox("Modelo", ['gemini-1.5-pro-preview-0514',
-                     'gemini-1.5-flash-preview-0514', 'gemini-1.0-pro'], key='model_name')
+        st.selectbox("Modelo", ['gemini-1.5-pro',
+                     'gemini-1.5-flash'], key='model_name')
         st.slider("Temperatura", 0.0, 1.0, value=1.0,
                   step=0.05, key='temperature')
         st.write(
