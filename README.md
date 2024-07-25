@@ -5,7 +5,7 @@ AjudanTe20 é um assistente que utiliza das capacidades geracionais dos modelos 
 
 Adicionalmente, o assistente pode ajudar na criação de ganchos e personagens para uma aventura, utilizando do contexto do mundo de Arton presente em sua base de conhecimento.
 
-https://ajudante20.com/
+https://t20-ajudante.streamlit.app/
 
 ## Funcionamento
 ![ex-gif](./img/example.gif)
@@ -53,9 +53,10 @@ Veja a [documentação oficial](https://cloud.google.com/docs/authentication/app
 langchain
 langchain_chroma
 langchain_community
-langchain_google_vertexai
+langchain-google-genai
 streamlit
 jq
+pysqlite3-binary
 ```
 
 ## To-do
