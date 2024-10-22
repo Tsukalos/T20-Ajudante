@@ -11,7 +11,7 @@ from langchain_chroma import Chroma
 
 
 from langchain_google_genai.embeddings import GoogleGenerativeAIEmbeddings
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_google_genai import ChatGoogleGenerativeAI, HarmBlockThreshold, HarmCategory
 
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
@@ -20,6 +20,7 @@ from langchain_core.prompts import PromptTemplate
 from argparse import ArgumentParser
 from loaders import book_loader, get_grimoire_docs
 
+from pathlib import Path
 
 
 parser = ArgumentParser("Ajudante do Mestre - Atlas de Arton")
@@ -28,33 +29,33 @@ parser.add_argument("--generate_embeddings", action="store_true",
 parser.add_argument("--reveal_retrieved_docs", action="store_true")
 args = parser.parse_args()
 
-
-
-
-
-
 if "GOOGLE_API_KEY" not in os.environ:
     os.environ["GOOGLE_API_KEY"] = getpass("Provide your Google API key here: ")
 
+safety_settings = {
+    HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT : HarmBlockThreshold.BLOCK_NONE,
+    HarmCategory.HARM_CATEGORY_HATE_SPEECH : HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT : HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    HarmCategory.HARM_CATEGORY_HARASSMENT : HarmBlockThreshold.BLOCK_NONE,
+}
 
 st.set_page_config(page_title='AjudanTe20', page_icon='img/128px-D20_icon.png')
 @st.cache_resource
 def initialize_data():
     
 
-    DATA_DIR = "./data/"
+    DATA_DIR = Path("./data/")
 
     # define o modelo para gerar os embeddings
     embedding_function = GoogleGenerativeAIEmbeddings(
         model="models/text-embedding-004")
     # aonde salvar os embeddings
-    chroma_dir = os.path.join(DATA_DIR, "chroma_db/")
-    store_dir = os.path.join(DATA_DIR, 'store/')
-    if not os.path.exists(store_dir):
-        os.makedirs(store_dir)
+    chroma_dir = DATA_DIR / "chroma_db/"
     if args.generate_embeddings:
-        with open(os.path.join(DATA_DIR, 'atlas/output_clean.md'), 'r') as file:
-            md_text = file.read()
+        # with open(os.path.join(DATA_DIR, 'atlas/output_clean.md'), 'r') as file:
+        #     md_text = file.read()
+
+        md_text = (DATA_DIR / 'atlas/output_clean.md').read_text()
 
         docs = []
         # define o divisor de arquivos para o .md do atlas de arton
@@ -70,53 +71,24 @@ def initialize_data():
         print(f'Num. docs: {len(docs)}')
 
         vectorstore = Chroma.from_documents(
-            documents=docs, embedding=embedding_function, persist_directory=chroma_dir)
-
-    
-    vectorstore = Chroma(persist_directory=chroma_dir,
-                         embedding_function=embedding_function)
+            collection_name="t20",
+            documents=docs, 
+            embedding=embedding_function, 
+            persist_directory=str(chroma_dir)
+        )
+    else:
+        vectorstore = Chroma(
+            collection_name="t20",
+            persist_directory=str(chroma_dir),
+            embedding_function=embedding_function)
     
     retriever = vectorstore.as_retriever(
-        search_type="mmr", search_kwargs={"k": 7})
-    
+        search_type="mmr", 
+        search_kwargs={"k": 3}
+    )
 
-
-    template = """
-    Você é um ajudante de um mestre de RPG, no sistema Tormenta 20, utilizando o cenário padrão, o mundo de Arton. 
-    Não utilize informações de outros sistemas de RPG.
-
-    Primeiro, interprete se a <Entrada> requisita uma ajuda criativa, ou sobre o sistema.
-
-    Se for sobre o sistema, sua tarefa é responder a <Entrada> sobre itens, equipamentos, classes, raças, poderes, regras, dentre outros. 
-    
-    Considere somente o campo de <Contexto> como fonte para responder a <Entrada>. 
-    Caso uma resposta ou intuição não esteja disponível no <Contexto>, não tente inventar uma <Saída>.
-
-    ---
-    
-    Em uma <Entrada> de ajuda criativa (como ajudar na criação de ganchos, personagens e descrições) utilize do <Contexto> para obter intuições do que usar na resposta.
-    Caso o <Contexto> forneça um personagem, tente utiliza-lo.
-    Uma <Saída> gerada com ambientes e personagens deve ter descrições bem desenvolvidas.
-
-    ---
-
-    Você deve buscar o <Contexto> e recuperar as informações relevantes que respondam a requisição, ou pergunta, dada na <Entrada>.
-
-    
-    Qualquer <Saída> gerada deve ser formatada em markdown. Não exiba campos entre <>.
-
-    ---
-
-    <Contexto>: {context}
-
-    ---
-
-    <Entrada>: {question}
-
-    ---
-
-    <Saída>:
-    """
+    prompt_file = Path(DATA_DIR) / 'prompt' / 't20.md'
+    template = (prompt_file).read_text()
     custom_rag_prompt = PromptTemplate.from_template(template)
 
     return retriever, custom_rag_prompt
@@ -130,13 +102,21 @@ def format_docs(docs):
         for doc in docs:
             print(f'{doc}\n\n\n')
     return "\n\n".join(doc.page_content for doc in docs)
-
-
+    
 def generate_response(text):
     if text != '':
         with st.spinner('Gerando...'):
-            llm = ChatGoogleGenerativeAI(model=st.session_state.model_name,
-                               temperature=st.session_state.temperature, max_tokens=8192, max_output_tokens=8192, max_retries=12, timeout=30)
+
+            llm = ChatGoogleGenerativeAI(
+                model=st.session_state.model_name,
+                temperature=st.session_state.temperature, 
+                max_tokens=8192, 
+                max_output_tokens=8192, 
+                max_retries=12, 
+                timeout=30,
+                safety_settings=safety_settings)
+            
+
             rag_chain = (
                 {"context": retriever | format_docs,
                     "question": RunnablePassthrough()}
